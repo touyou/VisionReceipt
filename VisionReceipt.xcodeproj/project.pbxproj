@@ -11,6 +11,8 @@
 		434FB0C7285F653100838D43 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FB0C6285F653100838D43 /* ContentView.swift */; };
 		434FB0C9285F653500838D43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 434FB0C8285F653500838D43 /* Assets.xcassets */; };
 		434FB0CC285F653500838D43 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 434FB0CB285F653500838D43 /* Preview Assets.xcassets */; };
+		434FB0D3285F67D100838D43 /* ReceiptData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FB0D2285F67D000838D43 /* ReceiptData.swift */; };
+		434FB0D7285FFCCF00838D43 /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FB0D6285FFCCF00838D43 /* ScannerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +21,8 @@
 		434FB0C6285F653100838D43 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		434FB0C8285F653500838D43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		434FB0CB285F653500838D43 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		434FB0D2285F67D000838D43 /* ReceiptData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptData.swift; sourceTree = "<group>"; };
+		434FB0D6285FFCCF00838D43 /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +59,8 @@
 				434FB0C6285F653100838D43 /* ContentView.swift */,
 				434FB0C8285F653500838D43 /* Assets.xcassets */,
 				434FB0CA285F653500838D43 /* Preview Content */,
+				434FB0D2285F67D000838D43 /* ReceiptData.swift */,
+				434FB0D6285FFCCF00838D43 /* ScannerView.swift */,
 			);
 			path = VisionReceipt;
 			sourceTree = "<group>";
@@ -138,7 +144,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				434FB0C7285F653100838D43 /* ContentView.swift in Sources */,
+				434FB0D3285F67D100838D43 /* ReceiptData.swift in Sources */,
 				434FB0C5285F653100838D43 /* VisionReceiptApp.swift in Sources */,
+				434FB0D7285FFCCF00838D43 /* ScannerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +278,9 @@
 				DEVELOPMENT_TEAM = B4S4333JDW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "画像を使用します";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "画像を使用します";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "画像を使用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +310,9 @@
 				DEVELOPMENT_TEAM = B4S4333JDW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "画像を使用します";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "画像を使用します";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "画像を使用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
