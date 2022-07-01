@@ -8,12 +8,14 @@
 
 import SwiftUI
 import PhotosUI
+import Vision
 
 struct ScannerView: View {
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var uiImage: UIImage?
     @State private var isPresented: Bool = false
-    @State private var loading: Bool = false
+    @State private var imageLoading: Bool = false
+    @State private var processLoading: Bool = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -22,7 +24,7 @@ struct ScannerView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: 300)
-            } else if loading {
+            } else if imageLoading {
                 ProgressView()
                     .progressViewStyle(.circular)
             } else {
@@ -37,11 +39,18 @@ struct ScannerView: View {
                     Image(systemName: "photo.fill")
                         .font(.title)
                 })
+                .disabled(processLoading)
                 Button(action: {
-                    print("proceed vision detect")
+                    processLoading = true
+                    executeTextRecognizer()
                 }, label: {
-                    Image(systemName: "brain")
-                        .font(.title)
+                    if processLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    } else {
+                        Image(systemName: "brain")
+                            .font(.title)
+                    }
                 })
                 .disabled(uiImage == nil)
             }
@@ -56,11 +65,11 @@ struct ScannerView: View {
         )
         .onChange(of: pickerItems) { newValue in
             if let value = newValue.first {
-                loading = true
+                imageLoading = true
                 Task {
                    try await loadTransferable(from: value)
                     await MainActor.run {
-                        loading = false
+                        imageLoading = false
                     }
                 }
             }
@@ -84,6 +93,39 @@ struct ScannerView: View {
         } catch {
             print("\(#function) | error: \(error)")
         }
+    }
+
+    /// 文字認識を走らせる
+    /// ref: https://developer.apple.com/documentation/vision/recognizing_text_in_images/
+    private func executeTextRecognizer() {
+        guard let cgImage = uiImage?.cgImage else {
+            processLoading = false
+            return
+        }
+        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
+        let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
+        request.revision = VNRecognizeTextRequestRevision3
+        request.recognitionLanguages = ["ja", "en"]
+        do {
+            try requestHandler.perform([request])
+        } catch {
+            processLoading = false
+            print("Unable to perform the requests: \(error)")
+        }
+    }
+
+    private func recognizeTextHandler(request: VNRequest, error: Error?) {
+        guard let observations = request.results as? [VNRecognizedTextObservation] else {
+            processLoading = false
+            return
+        }
+        print("observations: \(observations)")
+        let recognizedStrings = observations.compactMap { observation in
+            return observation.topCandidates(1).first?.string
+        }
+
+        processLoading = false
+        print("result \(recognizedStrings)")
     }
 }
 
