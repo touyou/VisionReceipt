@@ -11,71 +11,78 @@ import PhotosUI
 import Vision
 
 struct ScannerView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var pickerItems: [PhotosPickerItem] = []
     @State private var uiImage: UIImage?
     @State private var isPresented: Bool = false
     @State private var imageLoading: Bool = false
     @State private var processLoading: Bool = false
+    @State private var presentedReceipt: [ReceiptData] = []
 
     var body: some View {
-        VStack(spacing: 24) {
-            if let uiImage {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxHeight: 300)
-            } else if imageLoading {
-                ProgressView()
-                    .progressViewStyle(.circular)
-            } else {
-                Rectangle()
-                    .fill(.gray)
-                    .frame(maxHeight: 300)
-            }
-            HStack(alignment: .center, spacing: 16) {
-                Button(action: {
-                    isPresented = true
-                }, label: {
-                    Image(systemName: "photo.fill")
-                        .font(.title)
-                })
-                .disabled(processLoading)
-                Button(action: {
-                    processLoading = true
-                    executeTextRecognizer()
-                }, label: {
-                    if processLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                    } else {
-                        Image(systemName: "brain")
+        NavigationStack(path: $presentedReceipt) {
+            VStack(spacing: 24) {
+                if let uiImage {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 300)
+                } else if imageLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                } else {
+                    Rectangle()
+                        .fill(.gray)
+                        .frame(maxHeight: 300)
+                }
+                HStack(alignment: .center, spacing: 16) {
+                    Button(action: {
+                        isPresented = true
+                    }, label: {
+                        Image(systemName: "photo.fill")
                             .font(.title)
-                    }
-                })
-                .disabled(uiImage == nil)
+                    })
+                    .disabled(processLoading)
+                    Button(action: {
+                        processLoading = true
+                        executeTextRecognizer()
+                    }, label: {
+                        if processLoading {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                        } else {
+                            Image(systemName: "brain")
+                                .font(.title)
+                        }
+                    })
+                    .disabled(uiImage == nil)
+                }
             }
-        }
-        .photosPicker(
-            isPresented: $isPresented,
-            selection: $pickerItems,
-            maxSelectionCount: 1,
-            matching: .images,
-            preferredItemEncoding: .automatic,
-            photoLibrary: PHPhotoLibrary.shared()
-        )
-        .onChange(of: pickerItems) { newValue in
-            if let value = newValue.first {
-                imageLoading = true
-                Task {
-                   try await loadTransferable(from: value)
-                    await MainActor.run {
-                        imageLoading = false
+            .navigationDestination(for: ReceiptData.self) { receipt in
+                CheckView(receiptData: receipt, dismiss: dismiss)
+            }
+            .photosPicker(
+                isPresented: $isPresented,
+                selection: $pickerItems,
+                maxSelectionCount: 1,
+                matching: .images,
+                preferredItemEncoding: .automatic,
+                photoLibrary: PHPhotoLibrary.shared()
+            )
+            .onChange(of: pickerItems) { newValue in
+                if let value = newValue.first {
+                    imageLoading = true
+                    Task {
+                        try await loadTransferable(from: value)
+                        await MainActor.run {
+                            imageLoading = false
+                        }
                     }
                 }
             }
-        }
-        .onAppear {
-            PHPhotoLibrary.requestAuthorization({_ in })
+            .onAppear {
+                PHPhotoLibrary.requestAuthorization({_ in })
+            }
         }
     }
 
@@ -119,13 +126,20 @@ struct ScannerView: View {
             processLoading = false
             return
         }
-        print("observations: \(observations)")
-        let recognizedStrings = observations.compactMap { observation in
-            return observation.topCandidates(1).first?.string
+        let recognizedStringsAndBox = observations.compactMap { observation -> (String, CGPoint)? in
+            guard let string = observation.topCandidates(1).first?.string else {
+                return nil
+            }
+            return (string, observation.boundingBox.origin)
         }
 
         processLoading = false
-        print("result \(recognizedStrings)")
+        let sortedStrings = recognizedStringsAndBox.sorted { lhr, rhr in
+            return abs(rhr.1.x - lhr.1.x) <= 0.01 ? lhr.1.y <= rhr.1.y : lhr.1.x <= rhr.1.x
+        }
+        print("result \(sortedStrings)")
+
+        presentedReceipt = [ReceiptData(contents: sortedStrings.map { $0.0 })]
     }
 }
 

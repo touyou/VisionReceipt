@@ -9,40 +9,49 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("receiptDatas") var receiptDatas = ReceiptDatas()
     @State private var showScannerSheet = false
-    @State private var receipts: [ReceiptData] = []
 
-    init(showScannerSheet: Bool = false, receipts: [ReceiptData] = []) {
+    init(showScannerSheet: Bool = false) {
         self.showScannerSheet = showScannerSheet
-        self.receipts = receipts
     }
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .center) {
-                if receipts.isEmpty {
+                if receiptDatas.isEmpty {
                     Text("データがありません")
                         .font(.title)
                 } else {
                     List {
-                        ForEach(receipts) { receipt in
+                        ForEach(receiptDatas) { receipt in
                             NavigationLink(destination:
                                 ScrollView {
-                                    Text(receipt.content)
+                                    Text(receipt.entireString)
+                                        .padding()
                                 }, label: {
-                                    Text(receipt.content).lineLimit(1)
+                                    Text(receipt.name).lineLimit(1)
                                 })
                         }
+                        .onDelete(perform: {
+                            receiptDatas.remove(atOffsets: $0)
+                        })
                     }
                 }
             }
                 .navigationTitle("Receipt Manager")
-                .navigationBarItems(trailing: Button(action: {
-                    showScannerSheet = true
-                }, label: {
-                    Image(systemName: "plus.circle")
-                        .font(.title)
-                }))
+                .navigationBarItems(trailing: HStack {
+                    Button(action: {
+                        print("グラフを表示する")
+                    }, label: {
+                        Image(systemName: "chart.bar.xaxis")
+                    })
+                    Button(action: {
+                        showScannerSheet = true
+                    }, label: {
+                        Image(systemName: "plus.circle")
+                    })
+                })
                 .sheet(isPresented: $showScannerSheet, content: {
                     ScannerView()
                 })
@@ -54,10 +63,7 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(receipts: [
-            ReceiptData(content: "Hello"),
-            ReceiptData(content: "World")
-        ])
+        ContentView()
     }
 }
 
