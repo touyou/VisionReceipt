@@ -12,15 +12,16 @@ import Charts
 struct ContentView: View {
     @AppStorage("receiptDatas") var receiptDatas = ReceiptDatas()
     @State private var showScannerSheet = false
-
+    
     private var entries: [ChartEntry] {
         let sortedDatas = receiptDatas.sorted(by: { $0.date < $1.date })
         let formatter = DateFormatter()
         formatter.dateFormat = "MMdd"
-        return sortedDatas.map { ChartEntry(date: formatter.string(from: $0.date), value: $0.totalCost()) }
-
+        return sortedDatas.map {
+            ChartEntry(date: formatter.string(from: $0.date), value: $0.totalCost())
+        }
     }
-
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .center) {
@@ -70,22 +71,22 @@ struct ContentView: View {
             }
             .navigationTitle("Receipt Manager")
             .navigationBarItems(trailing:
-                Button(action: {
-                    showScannerSheet = true
-                }, label: {
-                    Image(systemName: "plus.circle")
-                })
+                                    Button(action: {
+                showScannerSheet = true
+            }, label: {
+                Image(systemName: "plus.circle")
+            })
             )
             .sheet(isPresented: $showScannerSheet, content: {
                 ScannerView()
             })
         }
     }
-
+    
     init(showScannerSheet: Bool = false) {
         self.showScannerSheet = showScannerSheet
     }
-
+    
     struct ChartEntry: Identifiable {
         let date: String
         let value: Int
