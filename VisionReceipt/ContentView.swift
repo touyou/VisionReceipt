@@ -32,15 +32,17 @@ struct ContentView: View {
                     List {
                         Section("読み取り済みレシート") {
                             ForEach(receiptDatas) { receipt in
-                                NavigationLink(destination:
-                                                ScrollView {
-                                    VStack(alignment: .center, spacing: 8) {
-                                        Text("読み取られた金額 ¥\(receipt.totalCost())")
+                                NavigationLink(destination: List {
+                                    HStack(alignment: .firstTextBaseline) {
+                                        Text("読み取られた金額")
+                                            .font(.body)
+                                        Spacer()
+                                        Text("¥\(receipt.totalCost())")
                                             .font(.title.bold())
-                                        Text(receipt.entireString)
-                                            .textSelection(.enabled)
                                     }
                                     .padding()
+                                    Text(receipt.entireString)
+                                        .textSelection(.enabled)
                                 }, label: {
                                     HStack {
                                         Text(receipt.name).lineLimit(1)
